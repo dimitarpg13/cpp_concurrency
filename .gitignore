@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/src/vs2022/threads01/.vs/threads01/v17/Preview
+/src/vs2022/threads01/.vs/threads01/v17
+/src/vs2022/threads01/jthread_ex1/x64/Debug
