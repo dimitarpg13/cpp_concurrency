@@ -3,12 +3,13 @@
 //
 #include <iostream>
 #include <thread>
+#include <cstring>
 
 struct func
 {
     int& i;
     char * p;
-    const int N=1000000;
+    static const int N=1000000;
     func(int& i_) : i(i_)
     {
         p = new char[N];
@@ -16,8 +17,7 @@ struct func
 
     func(const func & f) : i(f.i) {
         p = new char[N];
-        for (int idx=0; idx < N; ++idx)
-            p[idx] = f.p[idx];
+        std::memcpy(p, f.p, N);
     }
 
     ~func() {
@@ -32,15 +32,16 @@ struct func
 
     void do_something(unsigned idx) {
 
-        p[idx] = idx % 256;
+        p[idx] = idx % 92 + 33;
         if (idx == i) {
-            std::cout << "func obj is at line " << i << std::endl;
+            std::cout << "func obj is at line: " << p[i] << std::endl;
         }
+
     }
 
     void operator()()
     {
-        for (unsigned j=0; j < 1000000; ++j)
+        for (unsigned j=0; j < N; ++j)
         {
             do_something(j);
         }
@@ -64,11 +65,11 @@ public:
     thread_guard& operator=(thread_guard const&)=delete;
 };
 
-void do_something_in_current_thread()
+void do_something_in_current_thread(int idx)
 {
-    for (int i = 0; i < 1000000; ++i) {
-        if (i == 100000) {
-            std::cout << "I am at line 100000!" << std::endl;
+    for (int i = 0; i < func::N; ++i) {
+        if (i == idx) {
+            std::cout << "I am at line " << idx << "!" << std::endl;
         }
     }
 };
@@ -80,7 +81,7 @@ void f()
     std::thread t(my_func);
     thread_guard g(t);
 
-    do_something_in_current_thread();
+    do_something_in_current_thread(some_local_state);
 }
 
 int main() {

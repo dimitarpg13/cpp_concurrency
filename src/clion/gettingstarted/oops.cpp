@@ -4,6 +4,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <cstring>
 
 using namespace std::chrono_literals;
 
@@ -11,15 +12,14 @@ struct func
 {
     int& i;
     char* p;
-    const int N=1000000;
+    static const int N=1000000;
     func(int& i_) : i(i_)
     {
         p = new char[N];
     }
     func(const func & f) : i(f.i) {
         p = new char[N];
-        for (int idx=0; idx < N; ++idx)
-            p[idx] = f.p[idx];
+        std::memcpy(p, f.p, N);
     }
     ~func() {
         std::cout << "From the destructor of func: value at func::i = " << p[i] << std::endl;
@@ -27,13 +27,13 @@ struct func
     }
 
     void do_something(int idx) {
-        p[idx] = 'A';
+        p[idx] = idx % 92 + 33;
         std::this_thread::sleep_for(100ms);
     }
 
     void operator()()
     {
-        for (unsigned j=0; j < 1000000; ++j)
+        for (unsigned j=0; j < N; ++j)
         {
             do_something(i);
         }
@@ -45,7 +45,7 @@ void oops() {
     func my_func(some_local_state);
     std::thread my_thread(my_func);
     my_thread.detach();
-    my_func.p = nullptr;
+    my_func.p = nullptr; // Oops, causing a crash by clearing shared between threads array pointer
 };
 
 int main() {
